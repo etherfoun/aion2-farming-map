@@ -67,7 +67,17 @@ const tileLayer = L.tileLayer('https://interactivemap.app/aion2/maps/imapp/uploa
   maxNativeZoom: 5,
   minNativeZoom: 0,
   bounds: [[0, 0], [4096, 4096]]
-}).addTo(map);
+});
+
+// Explicitly force no-referrer on tile images to bypass hotlink protection
+const originalCreateTile = tileLayer.createTile;
+tileLayer.createTile = function(coords, done) {
+  const tile = originalCreateTile.call(this, coords, done);
+  tile.referrerPolicy = 'no-referrer';
+  return tile;
+};
+
+tileLayer.addTo(map);
 
 // Layer Groups
 const zoneLayerGroup = L.layerGroup().addTo(map);
@@ -288,7 +298,7 @@ function populateMobList() {
     const color = GENRE_COLORS[item.genre] || '#fff';
     const displayCount = state.purePetsOnly ? item.pure_count : item.total_count;
 
-    const imgTag = item.icon ? `<img src="${item.icon}" class="mob-pet-thumb" alt="" onerror="this.style.display='none'">` : '';
+    const imgTag = item.icon ? `<img src="${item.icon}" referrerpolicy="no-referrer" class="mob-pet-thumb" alt="" onerror="this.style.display='none'">` : '';
 
     const label = document.createElement('label');
     label.className = `mob-item-label ${isCollected ? 'collected' : ''}`;
@@ -590,7 +600,7 @@ function renderMobMarkers(mobs) {
     let marker;
     if (m.icon) {
       const html = `<div style="width:22px;height:22px;border-radius:50%;border:2px solid ${color};box-shadow:0 0 8px ${color};overflow:hidden;background:#111827;cursor:pointer;">
-        <img src="${m.icon}" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'">
+        <img src="${m.icon}" referrerpolicy="no-referrer" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'">
       </div>`;
       const icon = L.divIcon({
         html: html,
@@ -617,7 +627,7 @@ function renderMobMarkers(mobs) {
     const popupHtml = `
       <div style="padding:10px 12px;min-width:200px;font-family:var(--font-family);">
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
-          ${m.icon ? `<img src="${m.icon}" style="width:28px;height:28px;border-radius:50%;border:2px solid ${color};">` : ''}
+          ${m.icon ? `<img src="${m.icon}" referrerpolicy="no-referrer" style="width:28px;height:28px;border-radius:50%;border:2px solid ${color};">` : ''}
           <div>
             <div style="font-weight:700;color:#fff;font-size:13px;">${dispName}</div>
             <div style="font-size:11px;color:${color}">[${m.genre}] • ${dispZone}</div>
@@ -701,7 +711,7 @@ function createSpotPopupHtml(spot) {
     .sort((a, b) => b[1] - a[1])
     .map(([name, count]) => {
       const iconUrl = spot.mobIcons && spot.mobIcons[name];
-      const imgTag = iconUrl ? `<img src="${iconUrl}" style="width:18px;height:18px;border-radius:50%;margin-right:6px;object-fit:cover;background:#111;">` : '';
+      const imgTag = iconUrl ? `<img src="${iconUrl}" referrerpolicy="no-referrer" style="width:18px;height:18px;border-radius:50%;margin-right:6px;object-fit:cover;background:#111;">` : '';
       const dispName = I18N.getSpeciesName(name);
       const escapedName = name.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
       return `
