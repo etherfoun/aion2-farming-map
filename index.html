@@ -6,7 +6,7 @@
   <meta name="referrer" content="no-referrer">
   <title>Aion 2 Altgard — Spot Farm Optimizer</title>
   <link rel="stylesheet" href="lib/leaflet.css">
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css?v=1.2">
 </head>
 <body>
   <div class="app-container">
@@ -35,10 +35,6 @@
       <div class="sidebar-content">
         <!-- Section: Genre & Pets -->
         <section class="sidebar-section">
-          <div class="section-header">
-            <h2 class="section-title" data-i18n="step1Title">Жанр и питомцы</h2>
-          </div>
-
           <!-- 1. Genre Filter -->
           <div class="control-section">
             <div class="section-label" data-i18n="genreSectionLabel">Жанр питомца</div>
@@ -113,26 +109,21 @@
 
         <!-- Section: Zone & Radius -->
         <section class="sidebar-section">
-          <div class="section-header">
-            <h2 class="section-title" data-i18n="step2Title">Зона и радиус</h2>
-          </div>
-
           <!-- 3. Zone Filter -->
           <div class="control-section">
-            <div class="section-label" data-i18n="zoneSectionLabel">Локация / Зона</div>
+            <div class="section-label" data-i18n="zoneSectionLabel" data-i18n-title="zoneHint" title="Фильтр поиска спотов по конкретной зоне">Локация / Зона</div>
             <div class="zone-select-wrapper">
               <select id="zoneSelect">
                 <option value="all" data-i18n="zoneAll">Вся карта Altgard</option>
                 <!-- Dynamically populated from MAP_AREAS -->
               </select>
             </div>
-            <div class="control-hint" data-i18n="zoneHint">Фильтр поиска спотов по конкретной зоне</div>
           </div>
 
           <!-- 4. Spot Parameters -->
           <div class="control-section">
             <div class="section-label">
-              <span data-i18n="radiusSectionLabel">Радиус пула спота</span>
+              <span data-i18n="radiusSectionLabel" data-i18n-title="radiusHint" title="Дистанция сбора мобов для одновременного фарма">Радиус пула спота</span>
               <span class="val-indicator" id="radiusIndicator">80 м</span>
             </div>
             <div class="range-slider-wrapper">
@@ -143,18 +134,16 @@
               <button type="button" class="radius-preset-btn active" data-radius="80" data-i18n="presetDefault">80м</button>
               <button type="button" class="radius-preset-btn" data-radius="120" data-i18n="presetWide">120м</button>
             </div>
-            <div class="control-hint" data-i18n="radiusHint">Дистанция сбора мобов для одновременного фарма</div>
           </div>
 
           <div class="control-section">
             <div class="section-label">
-              <span data-i18n="minMobsSectionLabel">Мин. питомцев на споте</span>
+              <span data-i18n="minMobsSectionLabel" data-i18n-title="minMobsHint" title="Минимум мобов для образования спота">Мин. питомцев на споте</span>
               <span class="val-indicator" id="minMobsIndicator">2</span>
             </div>
             <div class="range-slider-wrapper">
               <input type="range" id="minMobsSlider" min="1" max="15" step="1" value="2">
             </div>
-            <div class="control-hint" data-i18n="minMobsHint">Минимум мобов для образования спота</div>
           </div>
 
           <!-- 5. Layer Toggles -->
@@ -180,7 +169,7 @@
         <!-- Section: Top Spots Leaderboard -->
         <section class="sidebar-section spots-section">
           <div class="section-header">
-            <h2 class="section-title" data-i18n="step3Title">Топ спотов</h2>
+            <div class="section-label" data-i18n="spotsSectionLabel">Топ профитных спотов</div>
             <div class="spots-count-badge" id="spotsCountBadge">0 спотов</div>
           </div>
 
@@ -237,8 +226,8 @@
   <div class="toast-msg" id="toastMsg" data-i18n="toastCopied">Координаты скопированы!</div>
 
   <script src="lib/leaflet.js"></script>
-  <script src="i18n.js"></script>
-  <script src="data.js"></script>
-  <script src="app.js"></script>
+  <script src="i18n.js?v=1.2"></script>
+  <script src="data.js?v=1.2"></script>
+  <script src="app.js?v=1.2"></script>
 </body>
 </html>

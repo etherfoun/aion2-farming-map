@@ -108,11 +108,6 @@ const I18N = {
       quickStartStep2: '2. Настройте радиус спота или выберите пресет',
       quickStartStep3: '3. Нажмите на спот из топа для перехода на карте',
 
-      // Step cards
-      step1Title: 'Жанр и питомцы',
-      step2Title: 'Зона и радиус',
-      step3Title: 'Топ спотов',
-
       // Genre pills
       genreSectionLabel: 'Жанр питомца',
       genreAll: 'Все питомцы',
@@ -233,11 +228,6 @@ const I18N = {
       quickStartStep1: '1. Choose pet species or genre',
       quickStartStep2: '2. Adjust radius or pick preset',
       quickStartStep3: '3. Click top spot to jump to map',
-
-      // Step cards
-      step1Title: 'Genre & Pets',
-      step2Title: 'Zone & Radius',
-      step3Title: 'Top Spots',
 
       // Genre pills
       genreSectionLabel: 'Pet Genre',
