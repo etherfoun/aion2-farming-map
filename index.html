@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aion 2 Altgard — Spot Farm Optimizer</title>
+  <link rel="stylesheet" href="lib/leaflet.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Sidebar Controls -->
+    <aside class="sidebar" id="sidebar">
+      <button class="sidebar-toggle-btn" id="sidebarToggle" title="Свернуть / развернуть панель" data-i18n-title="sidebarToggleTitle">◀</button>
+      
+      <div class="sidebar-header">
+        <div class="app-title-group">
+          <h1>
+            <span>AION 2 • Altgard</span>
+            <span class="badge-version" data-i18n="appBadge">Spotter</span>
+          </h1>
+          <div class="app-subtitle" data-i18n="appSubtitle">Интерактивный калькулятор топ-спотов фарма</div>
+        </div>
+        <div class="lang-switch-group" id="langSwitcher">
+          <button type="button" class="lang-btn active" data-lang="ru">RU</button>
+          <button type="button" class="lang-btn" data-lang="en">EN</button>
+        </div>
+      </div>
+
+      <div class="sidebar-content">
+        <!-- 1. Genre Filter -->
+        <div class="control-section">
+          <div class="section-label" data-i18n="genreSectionLabel">Жанр питомца</div>
+          <div class="genre-pills">
+            <button type="button" class="genre-pill all active" data-genre="all">
+              <span data-i18n="genreAll">Все питомцы</span>
+              <span class="pill-count" id="countAll">313</span>
+            </button>
+            <button type="button" class="genre-pill cogni" data-genre="Cogni">
+              <span>Cogni</span>
+              <span class="pill-count" id="countCogni">53</span>
+            </button>
+            <button type="button" class="genre-pill fera" data-genre="Fera">
+              <span>Fera</span>
+              <span class="pill-count" id="countFera">169</span>
+            </button>
+            <button type="button" class="genre-pill natura" data-genre="Natura">
+              <span>Natura</span>
+              <span class="pill-count" id="countNatura">52</span>
+            </button>
+            <button type="button" class="genre-pill varian" data-genre="Varian">
+              <span>Varian</span>
+              <span class="pill-count" id="countVarian">39</span>
+            </button>
+            <button type="button" class="genre-pill multi" data-genre="multi">
+              <span data-i18n="genreMulti">★ Мульти-споты питомцев</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Режим выборки (Чистые петы vs Все спавны видов) -->
+        <div class="control-section">
+          <label class="mode-toggle-box">
+            <div class="mode-toggle-info">
+              <span class="mode-toggle-title" data-i18n="purePetsOnlyTitle">Только спавны питомцев</span>
+              <span class="mode-toggle-desc" id="modeDesc">313 точек спавна питомцев</span>
+            </div>
+            <input type="checkbox" id="togglePurePets" checked style="accent-color:#6366f1; width:16px; height:16px; cursor:pointer;">
+          </label>
+        </div>
+
+        <!-- 2. Specific Mob Multi-Select -->
+        <div class="control-section">
+          <div class="section-label">
+            <span data-i18n="mobsSectionLabel">Выбор конкретных питомцев</span>
+            <span class="val-indicator" id="selectedMobsCount">Все</span>
+          </div>
+          <div class="mob-select-container">
+            <div class="search-input-wrapper">
+              <span class="search-icon">🔍</span>
+              <input type="text" id="mobSearchInput" placeholder="Поиск питомца по названию..." data-i18n-placeholder="mobSearchPlaceholder" autocomplete="off">
+            </div>
+            <div class="mob-list-scroll" id="mobListScroll">
+              <!-- Dynamically populated -->
+            </div>
+            <div class="mob-actions">
+              <button type="button" class="mob-action-btn" id="btnSelectAllMobs" data-i18n="btnSelectAllMobs">Выбрать всех</button>
+              <button type="button" class="mob-action-btn" id="btnClearMobs" data-i18n="btnClearMobs">Сбросить</button>
+              <button type="button" class="mob-action-btn" id="btnHideSelectedMobs" style="color:#f87171;" data-i18n="btnHideSelectedMobs">Скрыть выбр.</button>
+            </div>
+          </div>
+          <label class="toggle-option" style="margin-top:4px;">
+            <span data-i18n="excludeCollectedLabel">Исключать собранных из расчёта</span>
+            <input type="checkbox" id="toggleHideCollected" checked>
+          </label>
+        </div>
+
+        <!-- 3. Zone Filter -->
+        <div class="control-section">
+          <div class="section-label" data-i18n="zoneSectionLabel">Локация / Зона</div>
+          <div class="zone-select-wrapper">
+            <select id="zoneSelect">
+              <option value="all" data-i18n="zoneAll">Вся карта Altgard</option>
+              <!-- Dynamically populated from MAP_AREAS -->
+            </select>
+          </div>
+        </div>
+
+        <!-- 4. Spot Parameters -->
+        <div class="control-section">
+          <div class="section-label">
+            <span data-i18n="radiusSectionLabel">Радиус пула спота</span>
+            <span class="val-indicator" id="radiusIndicator">80 м</span>
+          </div>
+          <div class="range-slider-wrapper">
+            <input type="range" id="radiusSlider" min="40" max="200" step="5" value="80">
+          </div>
+        </div>
+
+        <div class="control-section">
+          <div class="section-label">
+            <span data-i18n="minMobsSectionLabel">Мин. питомцев на споте</span>
+            <span class="val-indicator" id="minMobsIndicator">2</span>
+          </div>
+          <div class="range-slider-wrapper">
+            <input type="range" id="minMobsSlider" min="1" max="15" step="1" value="2">
+          </div>
+        </div>
+
+        <!-- 5. Layer Toggles -->
+        <div class="control-section">
+          <div class="section-label" data-i18n="mapLayersSectionLabel">Отображение на карте</div>
+          <div class="toggle-options-group">
+            <label class="toggle-option">
+              <span data-i18n="toggleMobMarkers">Точки спавна мобов</span>
+              <input type="checkbox" id="toggleMobMarkers" checked>
+            </label>
+            <label class="toggle-option">
+              <span data-i18n="toggleZones">Зоны и полигоны карты</span>
+              <input type="checkbox" id="toggleZones" checked>
+            </label>
+            <label class="toggle-option">
+              <span data-i18n="toggleCircles">Окружности радиуса спотов</span>
+              <input type="checkbox" id="toggleCircles" checked>
+            </label>
+          </div>
+        </div>
+
+        <!-- 6. Ranked Spots List -->
+        <div class="spots-list-section">
+          <div class="spots-list-header">
+            <div class="section-label" data-i18n="spotsSectionLabel">Топ профитных спотов</div>
+            <div class="spots-count-badge" id="spotsCountBadge">0 спотов</div>
+          </div>
+          <div class="spots-cards-container" id="spotsList">
+            <!-- Dynamically populated cards -->
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Map Viewport -->
+    <main class="map-viewport">
+      <div id="map"></div>
+
+      <!-- Top Right Controls -->
+      <div class="map-hud-top-right">
+        <button class="hud-btn" id="btnOpenCollected" title="Открыть список собранных питомцев" data-i18n-title="btnCollectedTitle"><span id="btnOpenCollectedText">✓ Собранные</span> (<span id="collectedCountBadge">0</span>)</button>
+        <button class="hud-btn" id="btnFitMap" title="Показать всю карту" data-i18n-title="btnFitMapTitle" data-i18n="btnFitMap">⤢ Центрировать</button>
+      </div>
+
+      <!-- Bottom Right Coordinates Readout -->
+      <div class="map-hud-bottom-right" id="coordsHUD" data-i18n="cursorHUDInitial">
+        Курсор: X: ----, Y: ----
+      </div>
+    </main>
+  </div>
+
+  <!-- Modal for managing collected pets -->
+  <div class="modal-overlay" id="collectedModal" style="display:none;">
+    <div class="modal-window">
+      <div class="modal-header">
+        <h2 data-i18n="modalTitle">Собранные питомцы</h2>
+        <button class="modal-close-btn" id="btnCloseCollectedModal">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-subtext" data-i18n="modalSubtext">Питомцы и точки, скрытые из отображения и расчёта спотов:</div>
+        <div class="collected-items-list" id="collectedItemsList">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="modal-btn danger" id="btnResetAllCollected" data-i18n="modalResetAllBtn">Вернуть всех (сбросить)</button>
+        <button class="modal-btn primary" id="btnCloseModalBtn" data-i18n="modalCloseBtn">Закрыть</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-msg" id="toastMsg" data-i18n="toastCopied">Координаты скопированы!</div>
+
+  <script src="lib/leaflet.js"></script>
+  <script src="i18n.js"></script>
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
