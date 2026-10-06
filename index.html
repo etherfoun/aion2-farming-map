@@ -12,7 +12,11 @@
   <div class="app-container">
     <!-- Sidebar Controls -->
     <aside class="sidebar" id="sidebar">
-      <button class="sidebar-toggle-btn" id="sidebarToggle" title="Свернуть / развернуть панель" data-i18n-title="sidebarToggleTitle">◀</button>
+      <button class="sidebar-toggle-btn" id="sidebarToggle" title="Свернуть / развернуть панель" data-i18n-title="sidebarToggleTitle">
+        <svg class="toggle-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="15 18 9 12 15 6"></polyline>
+        </svg>
+      </button>
       
       <div class="sidebar-header">
         <div class="app-title-group">
@@ -29,134 +33,161 @@
       </div>
 
       <div class="sidebar-content">
-        <!-- 1. Genre Filter -->
-        <div class="control-section">
-          <div class="section-label" data-i18n="genreSectionLabel">Жанр питомца</div>
-          <div class="genre-pills">
-            <button type="button" class="genre-pill all active" data-genre="all">
-              <span data-i18n="genreAll">Все питомцы</span>
-              <span class="pill-count" id="countAll">313</span>
-            </button>
-            <button type="button" class="genre-pill cogni" data-genre="Cogni">
-              <span>Cogni</span>
-              <span class="pill-count" id="countCogni">53</span>
-            </button>
-            <button type="button" class="genre-pill fera" data-genre="Fera">
-              <span>Fera</span>
-              <span class="pill-count" id="countFera">169</span>
-            </button>
-            <button type="button" class="genre-pill natura" data-genre="Natura">
-              <span>Natura</span>
-              <span class="pill-count" id="countNatura">52</span>
-            </button>
-            <button type="button" class="genre-pill varian" data-genre="Varian">
-              <span>Varian</span>
-              <span class="pill-count" id="countVarian">39</span>
-            </button>
-            <button type="button" class="genre-pill multi" data-genre="multi">
-              <span data-i18n="genreMulti">★ Мульти-споты питомцев</span>
-            </button>
+        <!-- Section: Genre & Pets -->
+        <section class="sidebar-section">
+          <div class="section-header">
+            <h2 class="section-title" data-i18n="step1Title">Жанр и питомцы</h2>
           </div>
-        </div>
 
-        <!-- Режим выборки (Чистые петы vs Все спавны видов) -->
-        <div class="control-section">
-          <label class="mode-toggle-box">
-            <div class="mode-toggle-info">
-              <span class="mode-toggle-title" data-i18n="purePetsOnlyTitle">Только спавны питомцев</span>
-              <span class="mode-toggle-desc" id="modeDesc">313 точек спавна питомцев</span>
-            </div>
-            <input type="checkbox" id="togglePurePets" checked style="accent-color:#6366f1; width:16px; height:16px; cursor:pointer;">
-          </label>
-        </div>
-
-        <!-- 2. Specific Mob Multi-Select -->
-        <div class="control-section">
-          <div class="section-label">
-            <span data-i18n="mobsSectionLabel">Выбор конкретных питомцев</span>
-            <span class="val-indicator" id="selectedMobsCount">Все</span>
-          </div>
-          <div class="mob-select-container">
-            <div class="search-input-wrapper">
-              <span class="search-icon">🔍</span>
-              <input type="text" id="mobSearchInput" placeholder="Поиск питомца по названию..." data-i18n-placeholder="mobSearchPlaceholder" autocomplete="off">
-            </div>
-            <div class="mob-list-scroll" id="mobListScroll">
-              <!-- Dynamically populated -->
-            </div>
-            <div class="mob-actions">
-              <button type="button" class="mob-action-btn" id="btnSelectAllMobs" data-i18n="btnSelectAllMobs">Выбрать всех</button>
-              <button type="button" class="mob-action-btn" id="btnClearMobs" data-i18n="btnClearMobs">Сбросить</button>
-              <button type="button" class="mob-action-btn" id="btnHideSelectedMobs" style="color:#f87171;" data-i18n="btnHideSelectedMobs">Скрыть выбр.</button>
+          <!-- 1. Genre Filter -->
+          <div class="control-section">
+            <div class="section-label" data-i18n="genreSectionLabel">Жанр питомца</div>
+            <div class="genre-pills">
+              <button type="button" class="genre-pill all active" data-genre="all">
+                <span data-i18n="genreAll">Все питомцы</span>
+                <span class="pill-count" id="countAll">313</span>
+              </button>
+              <button type="button" class="genre-pill cogni" data-genre="Cogni">
+                <span>Cogni</span>
+                <span class="pill-count" id="countCogni">53</span>
+              </button>
+              <button type="button" class="genre-pill fera" data-genre="Fera">
+                <span>Fera</span>
+                <span class="pill-count" id="countFera">169</span>
+              </button>
+              <button type="button" class="genre-pill natura" data-genre="Natura">
+                <span>Natura</span>
+                <span class="pill-count" id="countNatura">52</span>
+              </button>
+              <button type="button" class="genre-pill varian" data-genre="Varian">
+                <span>Varian</span>
+                <span class="pill-count" id="countVarian">39</span>
+              </button>
+              <button type="button" class="genre-pill multi" data-genre="multi">
+                <span data-i18n="genreMulti">Мульти-споты</span>
+              </button>
             </div>
           </div>
-          <label class="toggle-option" style="margin-top:4px;">
-            <span data-i18n="excludeCollectedLabel">Исключать собранных из расчёта</span>
-            <input type="checkbox" id="toggleHideCollected" checked>
-          </label>
-        </div>
 
-        <!-- 3. Zone Filter -->
-        <div class="control-section">
-          <div class="section-label" data-i18n="zoneSectionLabel">Локация / Зона</div>
-          <div class="zone-select-wrapper">
-            <select id="zoneSelect">
-              <option value="all" data-i18n="zoneAll">Вся карта Altgard</option>
-              <!-- Dynamically populated from MAP_AREAS -->
-            </select>
-          </div>
-        </div>
-
-        <!-- 4. Spot Parameters -->
-        <div class="control-section">
-          <div class="section-label">
-            <span data-i18n="radiusSectionLabel">Радиус пула спота</span>
-            <span class="val-indicator" id="radiusIndicator">80 м</span>
-          </div>
-          <div class="range-slider-wrapper">
-            <input type="range" id="radiusSlider" min="40" max="200" step="5" value="80">
-          </div>
-        </div>
-
-        <div class="control-section">
-          <div class="section-label">
-            <span data-i18n="minMobsSectionLabel">Мин. питомцев на споте</span>
-            <span class="val-indicator" id="minMobsIndicator">2</span>
-          </div>
-          <div class="range-slider-wrapper">
-            <input type="range" id="minMobsSlider" min="1" max="15" step="1" value="2">
-          </div>
-        </div>
-
-        <!-- 5. Layer Toggles -->
-        <div class="control-section">
-          <div class="section-label" data-i18n="mapLayersSectionLabel">Отображение на карте</div>
-          <div class="toggle-options-group">
-            <label class="toggle-option">
-              <span data-i18n="toggleMobMarkers">Точки спавна мобов</span>
-              <input type="checkbox" id="toggleMobMarkers" checked>
-            </label>
-            <label class="toggle-option">
-              <span data-i18n="toggleZones">Зоны и полигоны карты</span>
-              <input type="checkbox" id="toggleZones" checked>
-            </label>
-            <label class="toggle-option">
-              <span data-i18n="toggleCircles">Окружности радиуса спотов</span>
-              <input type="checkbox" id="toggleCircles" checked>
+          <!-- Режим выборки (Чистые петы vs Все спавны видов) -->
+          <div class="control-section">
+            <label class="mode-toggle-box">
+              <div class="mode-toggle-info">
+                <span class="mode-toggle-title" data-i18n="purePetsOnlyTitle">Только спавны питомцев</span>
+                <span class="mode-toggle-desc" id="modeDesc">313 точек спавна питомцев</span>
+              </div>
+              <input type="checkbox" id="togglePurePets" checked style="accent-color:#6366f1; width:16px; height:16px; cursor:pointer;">
             </label>
           </div>
-        </div>
 
-        <!-- 6. Ranked Spots List -->
-        <div class="spots-list-section">
-          <div class="spots-list-header">
-            <div class="section-label" data-i18n="spotsSectionLabel">Топ профитных спотов</div>
+          <!-- 2. Specific Mob Multi-Select -->
+          <div class="control-section">
+            <div class="section-label">
+              <span data-i18n="mobsSectionLabel">Выбор конкретных питомцев</span>
+              <span class="val-indicator" id="selectedMobsCount">Все</span>
+            </div>
+            <div class="mob-select-container">
+              <div class="search-input-wrapper">
+                <svg class="search-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <input type="text" id="mobSearchInput" placeholder="Поиск питомца по названию..." data-i18n-placeholder="mobSearchPlaceholder" autocomplete="off">
+                <button type="button" class="search-clear-btn" id="mobSearchClear" title="Очистить поиск" data-i18n-title="searchClearTitle" style="display:none;">✕</button>
+              </div>
+              <div class="mob-list-scroll" id="mobListScroll">
+                <!-- Dynamically populated -->
+              </div>
+              <div class="mob-actions">
+                <button type="button" class="mob-action-btn" id="btnSelectAllMobs" data-i18n="btnSelectAllMobs">Выбрать всех</button>
+                <button type="button" class="mob-action-btn" id="btnClearMobs" data-i18n="btnClearMobs">Сбросить</button>
+                <button type="button" class="mob-action-btn danger" id="btnHideSelectedMobs" data-i18n="btnHideSelectedMobs">Скрыть выбр.</button>
+              </div>
+            </div>
+            <label class="toggle-option">
+              <span data-i18n="excludeCollectedLabel">Исключать собранных из расчёта</span>
+              <input type="checkbox" id="toggleHideCollected" checked>
+            </label>
+          </div>
+        </section>
+
+        <!-- Section: Zone & Radius -->
+        <section class="sidebar-section">
+          <div class="section-header">
+            <h2 class="section-title" data-i18n="step2Title">Зона и радиус</h2>
+          </div>
+
+          <!-- 3. Zone Filter -->
+          <div class="control-section">
+            <div class="section-label" data-i18n="zoneSectionLabel">Локация / Зона</div>
+            <div class="zone-select-wrapper">
+              <select id="zoneSelect">
+                <option value="all" data-i18n="zoneAll">Вся карта Altgard</option>
+                <!-- Dynamically populated from MAP_AREAS -->
+              </select>
+            </div>
+            <div class="control-hint" data-i18n="zoneHint">Фильтр поиска спотов по конкретной зоне</div>
+          </div>
+
+          <!-- 4. Spot Parameters -->
+          <div class="control-section">
+            <div class="section-label">
+              <span data-i18n="radiusSectionLabel">Радиус пула спота</span>
+              <span class="val-indicator" id="radiusIndicator">80 м</span>
+            </div>
+            <div class="range-slider-wrapper">
+              <input type="range" id="radiusSlider" min="40" max="200" step="5" value="80">
+            </div>
+            <div class="radius-presets-group" id="radiusPresetsGroup">
+              <button type="button" class="radius-preset-btn" data-radius="60" data-i18n="presetSolo">60м</button>
+              <button type="button" class="radius-preset-btn active" data-radius="80" data-i18n="presetDefault">80м</button>
+              <button type="button" class="radius-preset-btn" data-radius="120" data-i18n="presetWide">120м</button>
+            </div>
+            <div class="control-hint" data-i18n="radiusHint">Дистанция сбора мобов для одновременного фарма</div>
+          </div>
+
+          <div class="control-section">
+            <div class="section-label">
+              <span data-i18n="minMobsSectionLabel">Мин. питомцев на споте</span>
+              <span class="val-indicator" id="minMobsIndicator">2</span>
+            </div>
+            <div class="range-slider-wrapper">
+              <input type="range" id="minMobsSlider" min="1" max="15" step="1" value="2">
+            </div>
+            <div class="control-hint" data-i18n="minMobsHint">Минимум мобов для образования спота</div>
+          </div>
+
+          <!-- 5. Layer Toggles -->
+          <div class="control-section">
+            <div class="section-label" data-i18n="mapLayersSectionLabel">Отображение на карте</div>
+            <div class="toggle-options-group">
+              <label class="toggle-option">
+                <span data-i18n="toggleMobMarkers">Точки спавна мобов</span>
+                <input type="checkbox" id="toggleMobMarkers" checked>
+              </label>
+              <label class="toggle-option">
+                <span data-i18n="toggleZones">Зоны и полигоны карты</span>
+                <input type="checkbox" id="toggleZones" checked>
+              </label>
+              <label class="toggle-option">
+                <span data-i18n="toggleCircles">Окружности радиуса спотов</span>
+                <input type="checkbox" id="toggleCircles" checked>
+              </label>
+            </div>
+          </div>
+        </section>
+
+        <!-- Section: Top Spots Leaderboard -->
+        <section class="sidebar-section spots-section">
+          <div class="section-header">
+            <h2 class="section-title" data-i18n="step3Title">Топ спотов</h2>
             <div class="spots-count-badge" id="spotsCountBadge">0 спотов</div>
           </div>
+
           <div class="spots-cards-container" id="spotsList">
-            <!-- Dynamically populated cards -->
+            <!-- Dynamically populated cards or friendly empty state -->
           </div>
-        </div>
+        </section>
       </div>
     </aside>
 
@@ -166,8 +197,14 @@
 
       <!-- Top Right Controls -->
       <div class="map-hud-top-right">
-        <button class="hud-btn" id="btnOpenCollected" title="Открыть список собранных питомцев" data-i18n-title="btnCollectedTitle"><span id="btnOpenCollectedText">✓ Собранные</span> (<span id="collectedCountBadge">0</span>)</button>
-        <button class="hud-btn" id="btnFitMap" title="Показать всю карту" data-i18n-title="btnFitMapTitle" data-i18n="btnFitMap">⤢ Центрировать</button>
+        <button class="hud-btn" id="btnOpenCollected" title="Открыть список собранных питомцев" data-i18n-title="btnCollectedTitle">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          <span id="btnOpenCollectedText" data-i18n="btnCollectedLabel">Собранные</span> (<span id="collectedCountBadge">0</span>)
+        </button>
+        <button class="hud-btn" id="btnFitMap" title="Показать всю карту" data-i18n-title="btnFitMapTitle">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"></path><path d="M9 21H3v-6"></path><path d="M21 3l-7 7"></path><path d="M3 21l7-7"></path></svg>
+          <span data-i18n="btnFitMap">Центрировать</span>
+        </button>
       </div>
 
       <!-- Bottom Right Coordinates Readout -->

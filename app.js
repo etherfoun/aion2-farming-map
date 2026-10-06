@@ -91,6 +91,7 @@ const genrePills = document.querySelectorAll('.genre-pill');
 const togglePurePets = document.getElementById('togglePurePets');
 const modeDesc = document.getElementById('modeDesc');
 const mobSearchInput = document.getElementById('mobSearchInput');
+const mobSearchClear = document.getElementById('mobSearchClear');
 const mobListScroll = document.getElementById('mobListScroll');
 const btnSelectAllMobs = document.getElementById('btnSelectAllMobs');
 const btnClearMobs = document.getElementById('btnClearMobs');
@@ -100,6 +101,7 @@ const selectedMobsCountBadge = document.getElementById('selectedMobsCount');
 const zoneSelect = document.getElementById('zoneSelect');
 const radiusSlider = document.getElementById('radiusSlider');
 const radiusIndicator = document.getElementById('radiusIndicator');
+const radiusPresetBtns = document.querySelectorAll('.radius-preset-btn');
 const minMobsSlider = document.getElementById('minMobsSlider');
 const minMobsIndicator = document.getElementById('minMobsIndicator');
 const toggleMobMarkers = document.getElementById('toggleMobMarkers');
@@ -154,8 +156,15 @@ function updateCollectedCounter() {
     collectedCountBadge.textContent = total;
   }
   if (btnOpenCollectedText) {
-    btnOpenCollectedText.textContent = I18N.currentLang === 'ru' ? '✓ Собранные' : '✓ Collected';
+    btnOpenCollectedText.textContent = I18N.t('btnCollectedLabel');
   }
+}
+
+// Get full dataset (both pure pet spawns and all spawns of pet species)
+function getFullDataset() {
+  const pure = (typeof PURE_PET_DATA !== 'undefined') ? PURE_PET_DATA : [];
+  const ext = (typeof EXTENDED_PET_DATA !== 'undefined') ? EXTENDED_PET_DATA : [];
+  return pure.concat(ext);
 }
 
 // Get active dataset based on mode
@@ -163,9 +172,7 @@ function getActiveDataset() {
   if (state.purePetsOnly) {
     return (typeof PURE_PET_DATA !== 'undefined') ? PURE_PET_DATA : [];
   } else {
-    const pure = (typeof PURE_PET_DATA !== 'undefined') ? PURE_PET_DATA : [];
-    const ext = (typeof EXTENDED_PET_DATA !== 'undefined') ? EXTENDED_PET_DATA : [];
-    return pure.concat(ext);
+    return getFullDataset();
   }
 }
 
@@ -240,12 +247,6 @@ function initZones() {
         sticky: true,
         direction: 'top',
         className: 'zone-tooltip'
-      });
-
-      poly.on('click', () => {
-        zoneSelect.value = area.name;
-        state.selectedZone = area.name;
-        recalculateSpots();
       });
 
       zoneLayerGroup.addLayer(poly);
@@ -592,50 +593,173 @@ function recalculateSpots() {
 // 9. Render Individual Pet Spawn Markers Layer
 function renderMobMarkers(mobs) {
   mobMarkersLayerGroup.clearLayers();
-  if (!state.showMobMarkers) return;
+  if (!state.showMobMarkers || !mobs || mobs.length === 0) return;
+
+  const R = state.spotRadius;
+  const R2 = R * R;
+  const fullDataset = getFullDataset();
+
+  // Spatial density pool: uncollected mobs from FULL dataset (PURE_PET_DATA + EXTENDED_PET_DATA)
+  // regardless of purePetsOnly mode, so badges and popups reflect true local density
+  const densityMobs = fullDataset.filter(mob => {
+    if (state.hideCollected) {
+      if (state.collectedSpecies.has(mob.name) || state.collectedPins.has(mob.id)) {
+        return false;
+      }
+    }
+    return true;
+  });
+
+  // Build Spatial Hash Grid for fast O(1) neighbor searches
+  const cellSize = Math.max(R, 10);
+  const grid = new Map();
+  for (let i = 0; i < densityMobs.length; i++) {
+    const mob = densityMobs[i];
+    const gx = Math.floor(mob.lat / cellSize);
+    const gy = Math.floor(mob.lng / cellSize);
+    const key = `${gx}_${gy}`;
+    let cell = grid.get(key);
+    if (!cell) {
+      cell = [];
+      grid.set(key, cell);
+    }
+    cell.push(mob);
+  }
 
   mobs.forEach(m => {
     const color = GENRE_COLORS[m.genre] || '#9ca3af';
-
-    let marker;
-    if (m.icon) {
-      const html = `<div style="width:22px;height:22px;border-radius:50%;border:2px solid ${color};box-shadow:0 0 8px ${color};overflow:hidden;background:#111827;cursor:pointer;">
-        <img src="${m.icon}" referrerpolicy="no-referrer" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'">
-      </div>`;
-      const icon = L.divIcon({
-        html: html,
-        className: 'pet-spawn-pin',
-        iconSize: [22, 22],
-        iconAnchor: [11, 11]
-      });
-      marker = L.marker([m.lat, m.lng], { icon: icon });
-    } else {
-      marker = L.circleMarker([m.lat, m.lng], {
-        radius: 4,
-        fillColor: color,
-        fillOpacity: 0.9,
-        color: '#000',
-        weight: 1
-      });
-    }
-
     const dispName = I18N.getSpeciesName(m.name);
     const dispZone = I18N.getZoneName(m.area);
     const escapedName = m.name.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
 
-    // Popup with actions to hide/collect
-    const popupHtml = `
-      <div style="padding:10px 12px;min-width:200px;font-family:var(--font-family);">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
-          ${m.icon ? `<img src="${m.icon}" referrerpolicy="no-referrer" style="width:28px;height:28px;border-radius:50%;border:2px solid ${color};">` : ''}
-          <div>
-            <div style="font-weight:700;color:#fff;font-size:13px;">${dispName}</div>
-            <div style="font-size:11px;color:${color}">[${m.genre}] • ${dispZone}</div>
+    // Find nearby mobs within radius R
+    const gx = Math.floor(m.lat / cellSize);
+    const gy = Math.floor(m.lng / cellSize);
+    let sameCount = 0;
+    let totalNearby = 0;
+    const otherMap = new Map();
+
+    for (let dx = -1; dx <= 1; dx++) {
+      for (let dy = -1; dy <= 1; dy++) {
+        const cell = grid.get(`${gx + dx}_${gy + dy}`);
+        if (!cell) continue;
+        for (let k = 0; k < cell.length; k++) {
+          const nm = cell[k];
+          const d2 = (nm.lat - m.lat) * (nm.lat - m.lat) + (nm.lng - m.lng) * (nm.lng - m.lng);
+          if (d2 <= R2) {
+            totalNearby++;
+            if (nm.name === m.name) {
+              sameCount++;
+            } else {
+              const prev = otherMap.get(nm.name);
+              if (prev) {
+                prev.count++;
+              } else {
+                otherMap.set(nm.name, { count: 1, icon: nm.icon, genre: nm.genre });
+              }
+            }
+          }
+        }
+      }
+    }
+
+    // Safety fallback
+    if (sameCount === 0) sameCount = 1;
+    if (totalNearby === 0) totalNearby = 1;
+
+    // List of other species nearby sorted by count descending
+    const otherSpeciesList = Array.from(otherMap.entries())
+      .map(([name, data]) => ({ name, count: data.count, icon: data.icon, genre: data.genre }))
+      .sort((a, b) => b.count - a.count);
+
+    // Badge styling and text
+    const hasOther = (totalNearby > sameCount);
+    const badgeClass = `${sameCount > 1 ? 'multi' : 'single'}${hasOther ? ' has-other' : ''}`;
+    const badgeTitle = hasOther
+      ? I18N.t('badgeTitleMixed', { name: dispName, same: sameCount, total: totalNearby, radius: R })
+      : I18N.t('badgeTitleSame', { name: dispName, count: sameCount, radius: R });
+
+    let iconHtml;
+    if (m.icon) {
+      iconHtml = `
+        <div class="pet-spawn-pin-wrapper">
+          <div class="pet-spawn-avatar" style="border: 2px solid ${color}; box-shadow: 0 0 8px ${color};">
+            <img src="${m.icon}" referrerpolicy="no-referrer" onerror="this.style.display='none'">
+          </div>
+          <span class="pet-pin-count-badge ${badgeClass}" data-count="${sameCount}" data-total="${totalNearby}" title="${badgeTitle}">${sameCount}</span>
+        </div>
+      `;
+    } else {
+      iconHtml = `
+        <div class="pet-spawn-pin-wrapper">
+          <div class="pet-spawn-avatar" style="border: 2px solid ${color}; background: ${color};"></div>
+          <span class="pet-pin-count-badge ${badgeClass}" data-count="${sameCount}" data-total="${totalNearby}" title="${badgeTitle}">${sameCount}</span>
+        </div>
+      `;
+    }
+
+    const icon = L.divIcon({
+      html: iconHtml,
+      className: 'pet-spawn-pin',
+      iconSize: [24, 24],
+      iconAnchor: [12, 12],
+      popupAnchor: [0, -14]
+    });
+
+    const marker = L.marker([m.lat, m.lng], { icon: icon });
+
+    // Other species breakdown HTML for popup
+    let otherSpeciesHtml = '';
+    if (otherSpeciesList.length > 0) {
+      otherSpeciesHtml = `
+        <div class="pet-popup-other-section">
+          <div class="pet-popup-other-title">${I18N.t('popupOtherSpeciesTitle')}</div>
+          <div class="pet-popup-other-list">
+            ${otherSpeciesList.map(other => {
+              const oDispName = I18N.getSpeciesName(other.name);
+              const oColor = GENRE_COLORS[other.genre] || '#9ca3af';
+              const oIconTag = other.icon ? `<img src="${other.icon}" referrerpolicy="no-referrer" class="pet-popup-other-icon" style="border: 1px solid ${oColor};">` : '';
+              return `
+                <div class="pet-popup-other-item">
+                  <div class="pet-popup-other-left">
+                    ${oIconTag}
+                    <span class="pet-popup-other-name" title="${oDispName}">${oDispName}</span>
+                    <span style="font-size:10px;color:${oColor}">[${other.genre}]</span>
+                  </div>
+                  <span class="pet-popup-other-count">x${other.count}</span>
+                </div>
+              `;
+            }).join('')}
           </div>
         </div>
-        <div style="font-size:11px;color:var(--text-muted);font-family:var(--font-mono);margin-bottom:8px;">
+      `;
+    }
+
+    // Popup with detailed nearby spawn info & collection actions
+    const popupHtml = `
+      <div class="pet-popup-card">
+        <div class="pet-popup-header">
+          ${m.icon ? `<img src="${m.icon}" referrerpolicy="no-referrer" class="pet-popup-avatar" style="border: 2px solid ${color};">` : ''}
+          <div>
+            <div class="pet-popup-title">${dispName}</div>
+            <div class="pet-popup-subtitle" style="color:${color}">[${m.genre}] • ${dispZone}</div>
+          </div>
+        </div>
+
+        <div class="pet-popup-coords">
           ${I18N.t('markerCoords', { lat: m.lat, lng: m.lng })}
         </div>
+
+        <div class="pet-popup-stats-box">
+          <div class="pet-popup-stat-row">
+            <span class="pet-popup-stat-label">${I18N.t('popupSpeciesInRadius', { radius: R, count: `<span class="pet-popup-stat-value highlight">${sameCount}</span>` })}</span>
+          </div>
+          <div class="pet-popup-stat-row">
+            <span class="pet-popup-stat-label">${I18N.t('popupTotalNearby', { radius: R, count: `<span class="pet-popup-stat-value total">${totalNearby}</span>` })}</span>
+          </div>
+          ${otherSpeciesHtml}
+        </div>
+
         <div class="marker-popup-actions">
           <button class="marker-action-btn collect-pin" onclick="collectPin('${m.id}', '${escapedName}')">${I18N.t('btnHidePin')}</button>
           <button class="marker-action-btn collect-species" onclick="toggleSpeciesCollected('${escapedName}')">${I18N.t('btnHideSpecies')}</button>
@@ -643,8 +767,18 @@ function renderMobMarkers(mobs) {
       </div>
     `;
 
-    marker.bindPopup(popupHtml, { maxWidth: 260 });
-    marker.bindTooltip(`<b>${dispName}</b><br><span style="color:${color}">[${m.genre}]</span> • ${dispZone}`, {
+    marker.bindPopup(popupHtml, { maxWidth: 290 });
+
+    // Tooltip on hover reflecting count
+    let tooltipHtml = `<b>${dispName}</b><br><span style="color:${color}">[${m.genre}]</span> • ${dispZone}`;
+    tooltipHtml += `<div style="margin-top:4px;padding-top:4px;border-top:1px solid rgba(255,255,255,0.2);font-size:11px;line-height:1.3;">`;
+    tooltipHtml += `<div>${I18N.t('tooltipSpeciesCount', { count: sameCount, radius: R })}</div>`;
+    if (hasOther) {
+      tooltipHtml += `<div style="color:#facc15;">${I18N.t('tooltipTotalNearby', { count: totalNearby, radius: R })}</div>`;
+    }
+    tooltipHtml += `</div>`;
+
+    marker.bindTooltip(tooltipHtml, {
       direction: 'top',
       opacity: 0.95
     });
@@ -722,7 +856,9 @@ function createSpotPopupHtml(spot) {
           </span>
           <div style="display:flex;align-items:center;gap:6px;">
             <span class="popup-mob-count">x${count}</span>
-            <button type="button" class="mob-hide-btn" title="${hideTitle}" onclick="toggleSpeciesCollected('${escapedName}')">✓</button>
+            <button type="button" class="mob-hide-btn" title="${hideTitle}" onclick="toggleSpeciesCollected('${escapedName}')">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            </button>
           </div>
         </div>
       `;
@@ -765,7 +901,23 @@ function renderLeaderboard(spots) {
   spotsListContainer.innerHTML = '';
 
   if (spots.length === 0) {
-    spotsListContainer.innerHTML = `<div style="padding:16px;color:var(--text-dim);text-align:center;">${I18N.t('noSpotsFound')}</div>`;
+    spotsListContainer.innerHTML = `
+      <div class="empty-spots-card">
+        <div class="empty-spots-icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon>
+          </svg>
+        </div>
+        <div class="empty-spots-title">${I18N.t('emptyStateTitle')}</div>
+        <div class="empty-spots-desc">${I18N.t('emptyStateDesc')}</div>
+        <ul class="empty-spots-tips">
+          <li>${I18N.t('emptyStateTip1')}</li>
+          <li>${I18N.t('emptyStateTip2')}</li>
+          <li>${I18N.t('emptyStateTip3')}</li>
+        </ul>
+      </div>
+    `;
     return;
   }
 
@@ -957,7 +1109,6 @@ function bindEvents() {
   // Sidebar Toggle
   sidebarToggle.addEventListener('click', () => {
     sidebar.classList.toggle('collapsed');
-    sidebarToggle.textContent = sidebar.classList.contains('collapsed') ? '▶' : '◀';
     setTimeout(() => {
       map.invalidateSize();
     }, 320);
@@ -1026,10 +1177,47 @@ function bindEvents() {
     });
   });
 
-  // Mob Search
+  // Radius Preset Helpers
+  function updateActiveRadiusPreset(radius) {
+    const r = Number(radius);
+    if (radiusPresetBtns) {
+      radiusPresetBtns.forEach(btn => {
+        const btnR = parseInt(btn.dataset.radius, 10);
+        btn.classList.toggle('active', btnR === r);
+      });
+    }
+  }
+
+  // Mob Search & Clear Button
   mobSearchInput.addEventListener('input', () => {
+    if (mobSearchClear) {
+      mobSearchClear.style.display = mobSearchInput.value.trim().length > 0 ? 'flex' : 'none';
+    }
     populateMobList();
   });
+
+  if (mobSearchClear) {
+    mobSearchClear.addEventListener('click', () => {
+      mobSearchInput.value = '';
+      mobSearchClear.style.display = 'none';
+      mobSearchInput.focus();
+      populateMobList();
+    });
+  }
+
+  // Radius Presets Buttons
+  if (radiusPresetBtns) {
+    radiusPresetBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const val = parseInt(btn.dataset.radius, 10);
+        state.spotRadius = val;
+        radiusSlider.value = val;
+        radiusIndicator.textContent = I18N.t('radiusMeters', { val });
+        updateActiveRadiusPreset(val);
+        recalculateSpots();
+      });
+    });
+  }
 
   // Select All Mobs in List
   btnSelectAllMobs.addEventListener('click', () => {
@@ -1070,6 +1258,7 @@ function bindEvents() {
     const val = parseInt(e.target.value, 10);
     state.spotRadius = val;
     radiusIndicator.textContent = I18N.t('radiusMeters', { val });
+    updateActiveRadiusPreset(val);
     recalculateSpots();
   });
 
@@ -1122,6 +1311,7 @@ function bindEvents() {
   I18N.onChange(() => {
     document.title = I18N.t('docTitle');
     radiusIndicator.textContent = I18N.t('radiusMeters', { val: state.spotRadius });
+    updateActiveRadiusPreset(state.spotRadius);
     updateSelectedMobsIndicator();
     updateGenreCounters();
     initZones();

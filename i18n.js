@@ -101,10 +101,22 @@ const I18N = {
       appSubtitle: 'Интерактивный калькулятор топ-спотов фарма',
       sidebarToggleTitle: 'Свернуть / развернуть панель',
 
+      // Onboarding Guide
+      quickStartTitle: 'Быстрый старт',
+      quickStartToggleTitle: 'Свернуть / развернуть подсказки',
+      quickStartStep1: '1. Выберите питомца или жанр',
+      quickStartStep2: '2. Настройте радиус спота или выберите пресет',
+      quickStartStep3: '3. Нажмите на спот из топа для перехода на карте',
+
+      // Step cards
+      step1Title: 'Жанр и питомцы',
+      step2Title: 'Зона и радиус',
+      step3Title: 'Топ спотов',
+
       // Genre pills
       genreSectionLabel: 'Жанр питомца',
       genreAll: 'Все питомцы',
-      genreMulti: '★ Мульти-споты питомцев',
+      genreMulti: 'Мульти-споты',
 
       // Pure pets toggle
       purePetsOnlyTitle: 'Только спавны питомцев',
@@ -116,6 +128,7 @@ const I18N = {
       mobsAllIndicator: 'Все',
       mobsSelectedIndicator: '{count} выбр.',
       mobSearchPlaceholder: 'Поиск питомца по названию...',
+      searchClearTitle: 'Очистить поиск',
       btnSelectAllMobs: 'Выбрать всех',
       btnClearMobs: 'Сбросить',
       btnHideSelectedMobs: 'Скрыть выбр.',
@@ -127,11 +140,17 @@ const I18N = {
       // Zone filter
       zoneSectionLabel: 'Локация / Зона',
       zoneAll: 'Вся карта Altgard',
+      zoneHint: 'Фильтр поиска спотов по конкретной зоне',
 
       // Spot parameters
       radiusSectionLabel: 'Радиус пула спота',
       radiusMeters: '{val} м',
+      radiusHint: 'Дистанция сбора мобов для одновременного фарма',
+      presetSolo: '60м',
+      presetDefault: '80м',
+      presetWide: '120м',
       minMobsSectionLabel: 'Мин. питомцев на споте',
+      minMobsHint: 'Минимум мобов для образования спота',
 
       // Map layers
       mapLayersSectionLabel: 'Отображение на карте',
@@ -143,23 +162,36 @@ const I18N = {
       spotsSectionLabel: 'Топ профитных спотов',
       spotsCountBadge: '{count} спотов',
       noSpotsFound: 'Нет доступных спотов под выбранные параметры (все питомцы собраны или не подходят)',
+      emptyStateTitle: 'Споты не найдены',
+      emptyStateDesc: 'Под текущие параметры не найдено скоплений питомцев.',
+      emptyStateTip1: 'Попробуйте уменьшить «Мин. питомцев на споте» (до 1–2)',
+      emptyStateTip2: 'Попробуйте увеличить «Радиус пула спота» (например, 120м)',
+      emptyStateTip3: 'Проверьте список собранных (возможно, нужные питомцы скрыты)',
       spotCardTitle: 'Спот #{rank}',
       spotCardMobsCount: '{count} питомцев',
       spotCardMapCoords: 'Карта: {lat}, {lng}',
-      copyBtn: '📋 Копировать',
+      copyBtn: 'Копировать',
 
       // HUD
-      btnCollected: '✓ Собранные ({count})',
+      btnCollectedLabel: 'Собранные',
+      btnCollected: 'Собранные ({count})',
       btnCollectedTitle: 'Открыть список собранных питомцев',
-      btnFitMap: '⤢ Центрировать',
+      btnFitMap: 'Центрировать',
       btnFitMapTitle: 'Показать всю карту',
       cursorHUDInitial: 'Курсор: X: ----, Y: ----',
       cursorHUD: 'Курсор: [{lat}, {lng}]',
 
       // Popups
       markerCoords: 'Координаты: {lat}, {lng}',
-      btnHidePin: '✓ Скрыть точку',
-      btnHideSpecies: '🚫 Скрыть весь вид',
+      btnHidePin: 'Скрыть точку',
+      btnHideSpecies: 'Скрыть весь вид',
+      popupSpeciesInRadius: 'Этого вида в радиусе {radius}м: {count}',
+      popupTotalNearby: 'Всего рядом: {count}',
+      popupOtherSpeciesTitle: 'Другие виды рядом:',
+      tooltipSpeciesCount: 'Этого вида в радиусе {radius}м: {count}',
+      tooltipTotalNearby: 'Всего рядом: {count}',
+      badgeTitleSame: '{name}: {count} в радиусе {radius}м',
+      badgeTitleMixed: '{name}: {same} (всего рядом: {total}) в радиусе {radius}м',
       spotPopupTitle: 'Спот #{rank}',
       spotPopupMobsCount: '({count} питомцев)',
       spotPopupComposition: 'Состав питомцев (R = {radius}м):',
@@ -177,9 +209,9 @@ const I18N = {
       modalCloseBtn: 'Закрыть',
 
       // Toasts
-      toastCopied: 'Координаты скопированы!',
-      toastCopiedCoords: 'Координаты [{coords}] скопированы!',
-      toastSpeciesRestored: 'Питомец [{name}] возвращён',
+      toastCopied: 'Координаты скопированы',
+      toastCopiedCoords: 'Координаты [{coords}] скопированы',
+      toastSpeciesRestored: 'Питомец [{name}] возвращен',
       toastSpeciesHidden: 'Питомец [{name}] скрыт (собран)',
       toastPinRestored: 'Метка #{pinId} возвращена',
       toastPinHidden: 'Точка [{name}] скрыта как собранная',
@@ -195,10 +227,22 @@ const I18N = {
       appSubtitle: 'Interactive Top Farm Spots Calculator',
       sidebarToggleTitle: 'Collapse / expand sidebar',
 
+      // Onboarding Guide
+      quickStartTitle: 'Quick Start Guide',
+      quickStartToggleTitle: 'Collapse / expand guide',
+      quickStartStep1: '1. Choose pet species or genre',
+      quickStartStep2: '2. Adjust radius or pick preset',
+      quickStartStep3: '3. Click top spot to jump to map',
+
+      // Step cards
+      step1Title: 'Genre & Pets',
+      step2Title: 'Zone & Radius',
+      step3Title: 'Top Spots',
+
       // Genre pills
       genreSectionLabel: 'Pet Genre',
       genreAll: 'All Pets',
-      genreMulti: '★ Multi-genre Spots',
+      genreMulti: 'Multi-genre Spots',
 
       // Pure pets toggle
       purePetsOnlyTitle: 'Dedicated Pet Spawns Only',
@@ -210,6 +254,7 @@ const I18N = {
       mobsAllIndicator: 'All',
       mobsSelectedIndicator: '{count} sel.',
       mobSearchPlaceholder: 'Search pet by name...',
+      searchClearTitle: 'Clear search',
       btnSelectAllMobs: 'Select All',
       btnClearMobs: 'Reset',
       btnHideSelectedMobs: 'Hide Selected',
@@ -221,11 +266,17 @@ const I18N = {
       // Zone filter
       zoneSectionLabel: 'Location / Zone',
       zoneAll: 'All Altgard Map',
+      zoneHint: 'Filter spots inside a specific map area',
 
       // Spot parameters
       radiusSectionLabel: 'Spot Cluster Radius',
       radiusMeters: '{val} m',
+      radiusHint: 'Mob pull distance for concurrent farming',
+      presetSolo: '60m',
+      presetDefault: '80m',
+      presetWide: '120m',
       minMobsSectionLabel: 'Min. Pets per Spot',
+      minMobsHint: 'Minimum mobs required to form a spot',
 
       // Map layers
       mapLayersSectionLabel: 'Map Display Layers',
@@ -237,23 +288,36 @@ const I18N = {
       spotsSectionLabel: 'Top Farming Spots',
       spotsCountBadge: '{count} spots',
       noSpotsFound: 'No available spots for the selected parameters (all pets collected or do not match)',
+      emptyStateTitle: 'No spots found',
+      emptyStateDesc: 'No pet clusters match your current filter settings.',
+      emptyStateTip1: 'Try reducing «Min. Pets per Spot» (e.g. to 1–2)',
+      emptyStateTip2: 'Try increasing «Spot Cluster Radius» (e.g. 120m preset)',
+      emptyStateTip3: 'Check collected pets list (they might be hidden)',
       spotCardTitle: 'Spot #{rank}',
       spotCardMobsCount: '{count} pets',
       spotCardMapCoords: 'Map: {lat}, {lng}',
-      copyBtn: '📋 Copy',
+      copyBtn: 'Copy',
 
       // HUD
-      btnCollected: '✓ Collected ({count})',
+      btnCollectedLabel: 'Collected',
+      btnCollected: 'Collected ({count})',
       btnCollectedTitle: 'Open collected pets list',
-      btnFitMap: '⤢ Reset View',
+      btnFitMap: 'Reset View',
       btnFitMapTitle: 'Show whole map',
       cursorHUDInitial: 'Cursor: X: ----, Y: ----',
       cursorHUD: 'Cursor: [{lat}, {lng}]',
 
       // Popups
       markerCoords: 'Coordinates: {lat}, {lng}',
-      btnHidePin: '✓ Hide Pin',
-      btnHideSpecies: '🚫 Hide Species',
+      btnHidePin: 'Hide Pin',
+      btnHideSpecies: 'Hide Species',
+      popupSpeciesInRadius: 'This species within {radius}m: {count}',
+      popupTotalNearby: 'Total nearby: {count}',
+      popupOtherSpeciesTitle: 'Other species nearby:',
+      tooltipSpeciesCount: 'This species within {radius}m: {count}',
+      tooltipTotalNearby: 'Total nearby: {count}',
+      badgeTitleSame: '{name}: {count} within {radius}m',
+      badgeTitleMixed: '{name}: {same} (total nearby: {total}) within {radius}m',
       spotPopupTitle: 'Spot #{rank}',
       spotPopupMobsCount: '({count} pets)',
       spotPopupComposition: 'Pet Composition (R = {radius}m):',
@@ -271,8 +335,8 @@ const I18N = {
       modalCloseBtn: 'Close',
 
       // Toasts
-      toastCopied: 'Coordinates copied!',
-      toastCopiedCoords: 'Coordinates [{coords}] copied!',
+      toastCopied: 'Coordinates copied',
+      toastCopiedCoords: 'Coordinates [{coords}] copied',
       toastSpeciesRestored: 'Pet [{name}] restored',
       toastSpeciesHidden: 'Pet [{name}] hidden (collected)',
       toastPinRestored: 'Pin #{pinId} restored',
