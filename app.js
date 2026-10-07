@@ -742,7 +742,7 @@ function renderMobMarkers(mobs) {
           ${m.icon ? `<img src="${m.icon}" referrerpolicy="no-referrer" class="pet-popup-avatar" style="border: 2px solid ${color};">` : ''}
           <div>
             <div class="pet-popup-title">${dispName}</div>
-            <div class="pet-popup-subtitle" style="color:${color}">[${m.genre}] • ${dispZone}</div>
+            <div class="pet-popup-subtitle" style="color:${color}">[${m.genre}] • ${dispZone}${m.mob_name && m.mob_name !== m.name ? ` <span style="opacity:0.85;font-size:11px;">(${m.mob_name})</span>` : ''}</div>
           </div>
         </div>
 
@@ -770,7 +770,7 @@ function renderMobMarkers(mobs) {
     marker.bindPopup(popupHtml, { maxWidth: 290 });
 
     // Tooltip on hover reflecting count
-    let tooltipHtml = `<b>${dispName}</b><br><span style="color:${color}">[${m.genre}]</span> • ${dispZone}`;
+    let tooltipHtml = `<b>${dispName}</b>${m.mob_name && m.mob_name !== m.name ? `<br><span style="font-size:11px;opacity:0.85;">${m.mob_name}</span>` : ''}<br><span style="color:${color}">[${m.genre}]</span> • ${dispZone}`;
     tooltipHtml += `<div style="margin-top:4px;padding-top:4px;border-top:1px solid rgba(255,255,255,0.2);font-size:11px;line-height:1.3;">`;
     tooltipHtml += `<div>${I18N.t('tooltipSpeciesCount', { count: sameCount, radius: R })}</div>`;
     if (hasOther) {
